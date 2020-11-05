@@ -67,3 +67,7 @@ button:focus {
 body {
 	padding: 0;
 }
+.s-app {
+	height: 100%;
+	overflow-y: hidden
+}
