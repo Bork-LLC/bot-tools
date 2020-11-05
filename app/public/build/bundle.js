@@ -1,6 +1,6 @@
 
-(function(l, r) { if (l.getElementById('livereloadscript')) return; r = l.createElement('script'); r.async = 1; r.src = '//' + (window.location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1'; r.id = 'livereloadscript'; l.head.appendChild(r) })(window.document);
-var app = (function () {
+(function(l, r) { if (l.getElementById('livereloadscript')) return; r = l.createElement('script'); r.async = 1; r.src = '//' + (window.location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1'; r.id = 'livereloadscript'; l.getElementsByTagName('head')[0].appendChild(r) })(window.document);
+var app = (function (svelteMaterialify) {
     'use strict';
 
     function noop() { }
@@ -23,6 +23,9 @@ var app = (function () {
     }
     function safe_not_equal(a, b) {
         return a != a ? b == b : a !== b || ((a && typeof a === 'object') || typeof a === 'function');
+    }
+    function is_empty(obj) {
+        return Object.keys(obj).length === 0;
     }
 
     function append(target, node) {
@@ -92,6 +95,7 @@ var app = (function () {
                 set_current_component(component);
                 update(component.$$);
             }
+            set_current_component(null);
             dirty_components.length = 0;
             while (binding_callbacks.length)
                 binding_callbacks.pop()();
@@ -126,11 +130,31 @@ var app = (function () {
         }
     }
     const outroing = new Set();
+    let outros;
     function transition_in(block, local) {
         if (block && block.i) {
             outroing.delete(block);
             block.i(local);
         }
+    }
+    function transition_out(block, local, detach, callback) {
+        if (block && block.o) {
+            if (outroing.has(block))
+                return;
+            outroing.add(block);
+            outros.c.push(() => {
+                outroing.delete(block);
+                if (callback) {
+                    if (detach)
+                        block.d(1);
+                    callback();
+                }
+            });
+            block.o(local);
+        }
+    }
+    function create_component(block) {
+        block && block.c();
     }
     function mount_component(component, target, anchor) {
         const { fragment, on_mount, on_destroy, after_update } = component.$$;
@@ -189,14 +213,15 @@ var app = (function () {
             context: new Map(parent_component ? parent_component.$$.context : []),
             // everything else
             callbacks: blank_object(),
-            dirty
+            dirty,
+            skip_bound: false
         };
         let ready = false;
         $$.ctx = instance
             ? instance(component, prop_values, (i, ret, ...rest) => {
                 const value = rest.length ? rest[0] : ret;
                 if ($$.ctx && not_equal($$.ctx[i], $$.ctx[i] = value)) {
-                    if ($$.bound[i])
+                    if (!$$.skip_bound && $$.bound[i])
                         $$.bound[i](value);
                     if (ready)
                         make_dirty(component, i);
@@ -211,8 +236,10 @@ var app = (function () {
         $$.fragment = create_fragment ? create_fragment($$.ctx) : false;
         if (options.target) {
             if (options.hydrate) {
+                const nodes = children(options.target);
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                $$.fragment && $$.fragment.l(children(options.target));
+                $$.fragment && $$.fragment.l(nodes);
+                nodes.forEach(detach);
             }
             else {
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -239,116 +266,186 @@ var app = (function () {
                     callbacks.splice(index, 1);
             };
         }
-        $set() {
-            // overridden by instance, if it has props
+        $set($$props) {
+            if (this.$$set && !is_empty($$props)) {
+                this.$$.skip_bound = true;
+                this.$$set($$props);
+                this.$$.skip_bound = false;
+            }
         }
     }
 
     function dispatch_dev(type, detail) {
-        document.dispatchEvent(custom_event(type, Object.assign({ version: '3.19.1' }, detail)));
+        document.dispatchEvent(custom_event(type, Object.assign({ version: '3.29.4' }, detail)));
     }
     function append_dev(target, node) {
-        dispatch_dev("SvelteDOMInsert", { target, node });
+        dispatch_dev('SvelteDOMInsert', { target, node });
         append(target, node);
     }
     function insert_dev(target, node, anchor) {
-        dispatch_dev("SvelteDOMInsert", { target, node, anchor });
+        dispatch_dev('SvelteDOMInsert', { target, node, anchor });
         insert(target, node, anchor);
     }
     function detach_dev(node) {
-        dispatch_dev("SvelteDOMRemove", { node });
+        dispatch_dev('SvelteDOMRemove', { node });
         detach(node);
     }
     function attr_dev(node, attribute, value) {
         attr(node, attribute, value);
         if (value == null)
-            dispatch_dev("SvelteDOMRemoveAttribute", { node, attribute });
+            dispatch_dev('SvelteDOMRemoveAttribute', { node, attribute });
         else
-            dispatch_dev("SvelteDOMSetAttribute", { node, attribute, value });
+            dispatch_dev('SvelteDOMSetAttribute', { node, attribute, value });
     }
-    function set_data_dev(text, data) {
-        data = '' + data;
-        if (text.data === data)
-            return;
-        dispatch_dev("SvelteDOMSetData", { node: text, data });
-        text.data = data;
+    function validate_slots(name, slot, keys) {
+        for (const slot_key of Object.keys(slot)) {
+            if (!~keys.indexOf(slot_key)) {
+                console.warn(`<${name}> received an unexpected slot "${slot_key}".`);
+            }
+        }
     }
     class SvelteComponentDev extends SvelteComponent {
         constructor(options) {
             if (!options || (!options.target && !options.$$inline)) {
-                throw new Error(`'target' is a required option`);
+                throw new Error("'target' is a required option");
             }
             super();
         }
         $destroy() {
             super.$destroy();
             this.$destroy = () => {
-                console.warn(`Component was already destroyed`); // eslint-disable-line no-console
+                console.warn('Component was already destroyed'); // eslint-disable-line no-console
             };
         }
         $capture_state() { }
         $inject_state() { }
     }
 
-    /* src\App.svelte generated by Svelte v3.19.1 */
-
+    /* src\App.svelte generated by Svelte v3.29.4 */
     const file = "src\\App.svelte";
 
     function create_fragment(ctx) {
     	let main;
-    	let h1;
+    	let div5;
+    	let div3;
+    	let div0;
+    	let img0;
+    	let img0_src_value;
     	let t0;
+    	let div1;
+    	let img1;
+    	let img1_src_value;
     	let t1;
+    	let div2;
+    	let img2;
+    	let img2_src_value;
     	let t2;
+    	let div4;
     	let t3;
-    	let p;
-    	let t4;
-    	let a;
-    	let t6;
+    	let materialapp;
+    	let current;
+
+    	materialapp = new svelteMaterialify.MaterialApp({
+    			props: {
+    				theme: "dark",
+    				style: "height: calc(100% - 36px); width: 100%; padding-top: 36px"
+    			},
+    			$$inline: true
+    		});
 
     	const block = {
     		c: function create() {
     			main = element("main");
-    			h1 = element("h1");
-    			t0 = text("Hello ");
-    			t1 = text(/*name*/ ctx[0]);
-    			t2 = text("!");
+    			div5 = element("div");
+    			div3 = element("div");
+    			div0 = element("div");
+    			img0 = element("img");
+    			t0 = space();
+    			div1 = element("div");
+    			img1 = element("img");
+    			t1 = space();
+    			div2 = element("div");
+    			img2 = element("img");
+    			t2 = space();
+    			div4 = element("div");
     			t3 = space();
-    			p = element("p");
-    			t4 = text("Visit the ");
-    			a = element("a");
-    			a.textContent = "Svelte tutorial";
-    			t6 = text(" to learn how to build Svelte apps.");
-    			attr_dev(h1, "class", "svelte-6wjt63");
-    			add_location(h1, file, 5, 1, 51);
-    			attr_dev(a, "href", "https://svelte.dev/tutorial");
-    			add_location(a, file, 6, 14, 89);
-    			add_location(p, file, 6, 1, 76);
-    			attr_dev(main, "class", "svelte-6wjt63");
-    			add_location(main, file, 4, 0, 42);
+    			create_component(materialapp.$$.fragment);
+    			if (img0.src !== (img0_src_value = "./min.png")) attr_dev(img0, "src", img0_src_value);
+    			attr_dev(img0, "alt", "");
+    			attr_dev(img0, "onclick", "ipc.send(\"min\")");
+    			attr_dev(img0, "class", "svelte-1cvnscq");
+    			add_location(img0, file, 13, 4, 249);
+    			attr_dev(div0, "class", "iconb svelte-1cvnscq");
+    			add_location(div0, file, 12, 3, 224);
+    			if (img1.src !== (img1_src_value = "./max.png")) attr_dev(img1, "src", img1_src_value);
+    			attr_dev(img1, "alt", "");
+    			attr_dev(img1, "onclick", "ipc.send(\"max\")");
+    			attr_dev(img1, "class", "svelte-1cvnscq");
+    			add_location(img1, file, 16, 4, 345);
+    			attr_dev(div1, "class", "iconb svelte-1cvnscq");
+    			add_location(div1, file, 15, 3, 320);
+    			if (img2.src !== (img2_src_value = "./close.png")) attr_dev(img2, "src", img2_src_value);
+    			attr_dev(img2, "alt", "");
+    			attr_dev(img2, "onclick", "ipc.send(\"close\")");
+    			attr_dev(img2, "class", "svelte-1cvnscq");
+    			add_location(img2, file, 19, 4, 452);
+    			attr_dev(div2, "class", "iconb svelte-1cvnscq");
+    			attr_dev(div2, "id", "close");
+    			add_location(div2, file, 18, 3, 416);
+    			attr_dev(div3, "id", "buttons");
+    			attr_dev(div3, "class", "svelte-1cvnscq");
+    			add_location(div3, file, 11, 2, 201);
+    			attr_dev(div4, "id", "maintop");
+    			attr_dev(div4, "class", "svelte-1cvnscq");
+    			add_location(div4, file, 22, 2, 536);
+    			attr_dev(div5, "id", "topbar");
+    			attr_dev(div5, "class", "svelte-1cvnscq");
+    			add_location(div5, file, 10, 1, 180);
+    			attr_dev(main, "class", "svelte-1cvnscq");
+    			add_location(main, file, 9, 0, 171);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, main, anchor);
-    			append_dev(main, h1);
-    			append_dev(h1, t0);
-    			append_dev(h1, t1);
-    			append_dev(h1, t2);
+    			append_dev(main, div5);
+    			append_dev(div5, div3);
+    			append_dev(div3, div0);
+    			append_dev(div0, img0);
+    			append_dev(div3, t0);
+    			append_dev(div3, div1);
+    			append_dev(div1, img1);
+    			append_dev(div3, t1);
+    			append_dev(div3, div2);
+    			append_dev(div2, img2);
+    			append_dev(div5, t2);
+    			append_dev(div5, div4);
     			append_dev(main, t3);
-    			append_dev(main, p);
-    			append_dev(p, t4);
-    			append_dev(p, a);
-    			append_dev(p, t6);
+    			mount_component(materialapp, main, null);
+    			current = true;
     		},
     		p: function update(ctx, [dirty]) {
-    			if (dirty & /*name*/ 1) set_data_dev(t1, /*name*/ ctx[0]);
+    			const materialapp_changes = {};
+
+    			if (dirty & /*$$scope*/ 4) {
+    				materialapp_changes.$$scope = { dirty, ctx };
+    			}
+
+    			materialapp.$set(materialapp_changes);
     		},
-    		i: noop,
-    		o: noop,
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(materialapp.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(materialapp.$$.fragment, local);
+    			current = false;
+    		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(main);
+    			destroy_component(materialapp);
     		}
     	};
 
@@ -364,18 +461,22 @@ var app = (function () {
     }
 
     function instance($$self, $$props, $$invalidate) {
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots("App", slots, []);
     	let { name } = $$props;
+    	const { ipcRenderer } = require("electron");
+    	window.ipc = ipcRenderer;
     	const writable_props = ["name"];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<App> was created with unknown prop '${key}'`);
     	});
 
-    	$$self.$set = $$props => {
+    	$$self.$$set = $$props => {
     		if ("name" in $$props) $$invalidate(0, name = $$props.name);
     	};
 
-    	$$self.$capture_state = () => ({ name });
+    	$$self.$capture_state = () => ({ name, MaterialApp: svelteMaterialify.MaterialApp, ipcRenderer });
 
     	$$self.$inject_state = $$props => {
     		if ("name" in $$props) $$invalidate(0, name = $$props.name);
@@ -426,5 +527,5 @@ var app = (function () {
 
     return app;
 
-}());
+}(svelteMaterialify));
 //# sourceMappingURL=bundle.js.map

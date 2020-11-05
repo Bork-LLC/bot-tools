@@ -1,3 +1,8 @@
-main.svelte-6wjt63{text-align:center;padding:1em;max-width:240px;margin:0 auto}h1.svelte-6wjt63{color:#ff3e00;text-transform:uppercase;font-size:4em;font-weight:100}@media(min-width: 640px){main.svelte-6wjt63{max-width:none}}
+#topbar.svelte-1cvnscq.svelte-1cvnscq{-webkit-box-shadow:0 2px 4px -1px rgba(0,0,0,0.25);-moz-box-shadow:0 2px 4px -1px rgba(0,0,0,0.25);box-shadow:0 2px 4px -1px rgba(0,0,0,0.25);height:36px;width:100%;background-color:#BC4B51}#buttons.svelte-1cvnscq.svelte-1cvnscq{width:130px;height:100%;float:right;display:inline-block
+	}#maintop.svelte-1cvnscq.svelte-1cvnscq{width:calc(100% - 130px);float:left;height:100%;-webkit-app-region:drag
+	}main.svelte-1cvnscq.svelte-1cvnscq{height:100%;width:100%;padding:0;background-color:#202225
+	}.iconb.svelte-1cvnscq.svelte-1cvnscq{display:inline-block;height:40px;width:40px
+	}.iconb.svelte-1cvnscq img.svelte-1cvnscq{padding-left:10px;padding-top:10px;width:15px;height:15px;-moz-user-select:none;-khtml-user-select:none;-webkit-user-select:none;-ms-user-select:none;user-select:none}.iconb.svelte-1cvnscq img .svelte-1cvnscq:hover{background-color:#1A1A1A
+	}
 
 /*# sourceMappingURL=bundle.css.map */
