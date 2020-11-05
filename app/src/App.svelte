@@ -1,5 +1,5 @@
 <script>
-	export let name;
+	// export let name;
 
 	import { MaterialApp, NavigationDrawer, List, ListItem } from 'svelte-materialify'
 
@@ -26,14 +26,14 @@
 <MaterialApp theme="dark">
 	<div id="topbar">
 		<div id="buttons">
-			<div class="iconb">
-				<img src="./min.png" alt='' onClick='ipc.send("min")'/>
+			<div class="iconb" on:click="{()=>window.ipc.send("min")}" >
+				<img src="./min.png" alt=''/>
 			</div>
-			<div class="iconb">
-				<img src="./max.png" alt='' onClick='ipc.send("max")'/>
+			<div class="iconb" on:click="{()=>window.ipc.send("max")}">
+				<img src="./max.png" alt='' />
 			</div>
-			<div class="iconb" id="close">
-				<img src="./close.png" alt='' onClick='ipc.send("close")'/>
+			<div class="iconb" id="close" on:click="{()=>window.ipc.send("close")}">
+				<img src="./close.png" alt=''/>
 			</div>
 		</div>
 		<div id="maintop"></div>
@@ -124,8 +124,9 @@
 	}
 	.iconb {
 		display: inline-block;
-		height: 40px;
-		width: 40px
+		height: 100%;
+		width: 40px;
+		cursor: pointer;
 	}
 	.iconb img {
 		padding-left: 10px;
