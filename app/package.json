@@ -51,7 +51,8 @@
     "sirv-cli": "^0.4.4",
     "svelte-awesome": "^2.3.0",
     "svelte-fa": "^2.1.1",
-    "svelte-icons": "^2.1.0"
+    "svelte-icons": "^2.1.0",
+    "svelte-routing": "^1.4.2"
   },
   "devDependencies": {
     "@electron-forge/cli": "^6.0.0-beta.50",

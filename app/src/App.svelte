@@ -9,6 +9,8 @@
 	import FaDungeon from 'svelte-icons/fa/FaDungeon.svelte'
 	import FaServer from 'svelte-icons/fa/FaServer.svelte'
 
+	import Home from './components/Home.svelte'
+
 	const { ipcRenderer } = require("electron");
 	window.ipc = ipcRenderer
 
@@ -34,12 +36,10 @@
 				<img src="./close.png" alt='' onClick='ipc.send("close")'/>
 			</div>
 		</div>
-		<div id="maintop">
-
-		</div>
+		<div id="maintop"></div>
 	</div>
 	<div style="height: 100%;"class='d-inline-block' id="nav"on:mouseenter={enter} on:mouseleave={leave}>
-		<NavigationDrawer {mini} style="background-color: rgb(40,40,40) ">
+		<NavigationDrawer {mini} style="background-color: rgb(40,40,40);float: left ">
 			<List dense nav>
 				<ListItem>
 					<span slot="prepend" style="padding-right: 10px;padding-top: 5px">
@@ -84,6 +84,9 @@
 				</ListItem>
 			</List>
 		</NavigationDrawer>
+		<div id='wrapper'style="float:right;width: calc(100% - 56px); height: 100%">
+
+		</div>
 	</div>
 </MaterialApp>
 
