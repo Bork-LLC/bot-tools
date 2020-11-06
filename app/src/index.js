@@ -1,5 +1,8 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
-const path = require('path');
+
+const discord = require('discord.js')
+const path    = require('path');
+const fs      = require('fs')
 
 // Live Reload
 require('electron-reload')(__dirname, {
@@ -48,3 +51,13 @@ app.on('activate', () => {
     createWindow();
   }
 });
+
+// Discord functions
+const tokens = fs.readFileSync(path.join(__dirname, '../tokens.txt')).toString().split(/[\r\n]+/)
+const clients = []
+
+// Load all tokens synchronously
+let counter = tokens.length
+for (token of tokens) {
+    
+}

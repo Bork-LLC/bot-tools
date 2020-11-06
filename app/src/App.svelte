@@ -2,6 +2,7 @@
 	// export let name;
 
 	import { MaterialApp, NavigationDrawer, List, ListItem } from 'svelte-materialify'
+	import { Router, Link } from '@jamen/svelte-router'
 
 	import FaHome from 'svelte-icons/fa/FaHome.svelte'
 	import FaCoins from 'svelte-icons/fa/FaCoins.svelte'
@@ -11,6 +12,12 @@
 
 	import Home from './components/Home.svelte'
 
+	// Router data
+	const routes = {
+		'/': Home
+	}
+
+	// Electron funcs to control app
 	const { ipcRenderer } = require("electron");
 	window.ipc = ipcRenderer
 
@@ -36,10 +43,13 @@
 				<img src="./close.png" alt=''/>
 			</div>
 		</div>
-		<div id="maintop"></div>
+		<div id="maintop">
+			<img id='icon' src='./favicon.gif' />
+			<h6 style='padding-left: 7px;padding-top: 1px;font-weight: 90%'>Bot Tools</h6>
+		</div>
 	</div>
 	<div style="height: 100%;"class='d-inline-block' id="nav"on:mouseenter={enter} on:mouseleave={leave}>
-		<NavigationDrawer {mini} style="background-color: rgb(40,40,40);float: left ">
+		<NavigationDrawer {mini} style="background-color: rgb(40,40,40);float: left; position: fixed; z-index: 12; top: 30px">
 			<List dense nav>
 				<ListItem>
 					<span slot="prepend" style="padding-right: 10px;padding-top: 5px">
@@ -48,7 +58,7 @@
 						</div>
 						
 					</span>
-					Home
+					<Link style='text-decoration: none;color: white !important' href='/'>Home</Link>
 				</ListItem>
 				<ListItem>
 					<span slot="prepend" style="padding-right: 10px;padding-top: 5px">
@@ -84,14 +94,20 @@
 				</ListItem>
 			</List>
 		</NavigationDrawer>
-		<div id='wrapper'style="float:right;width: calc(100% - 56px); height: 100%">
-
-		</div>
+	</div>
+	<div id='wrapper'style="float:right;width: calc(100% - 56px); height: calc(100% - 30px);margin-top: 30px">
+		<Router style="width:100%;height: 100%; float: right;" {routes}></Router>
 	</div>
 </MaterialApp>
 
 <style>
-
+	#icon {
+		float: left;
+		padding-left: 5px;
+		padding-top: 11px;
+		height: 25px;
+		width: 25px
+	}
 	.icon {
 		height: 20px;
 		width: 20px;
@@ -104,13 +120,15 @@
 		height: 30px;
 		width: 100%;
 		background-color: #BC4B51;
+		position: fixed; 
+		z-index: 3125
 	}
 	#buttons {
 		width: 130px;
 		height: 100%; 
 		float: right;
 		display: inline-block
-	}
+	} 
 	#maintop {
 		width: calc(100% - 130px);
 		float: left;

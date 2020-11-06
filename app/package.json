@@ -46,13 +46,16 @@
   },
   "dependencies": {
     "@fortawesome/free-solid-svg-icons": "^5.15.1",
+    "@jamen/svelte-router": "^0.4.0",
+    "carbon-components-svelte": "^0.22.0",
     "electron-reload": "^1.5.0",
     "electron-squirrel-startup": "^1.0.0",
     "sirv-cli": "^0.4.4",
     "svelte-awesome": "^2.3.0",
     "svelte-fa": "^2.1.1",
     "svelte-icons": "^2.1.0",
-    "svelte-routing": "^1.4.2"
+    "svelte-routing": "^1.4.2",
+    "svelte-simple-datatables": "^0.1.19"
   },
   "devDependencies": {
     "@electron-forge/cli": "^6.0.0-beta.50",
