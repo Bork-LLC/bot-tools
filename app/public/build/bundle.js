@@ -11345,12 +11345,12 @@ var app = (function () {
     					},
     					{
     						id: "b",
-    						stat: "Total Working Tokens",
+    						stat: "Total Valid Tokens",
     						value: "loading..."
     					},
     					{
     						id: "c",
-    						stat: "Total Broken Tokens",
+    						stat: "Total Invalid Tokens",
     						value: "loading..."
     					},
     					{

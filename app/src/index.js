@@ -28,16 +28,6 @@ const createWindow = () => {
   mainWindow.loadFile(path.join(__dirname, '../public/index.html'));
 };
 
-ipcMain.on('close', (event, arg) => {
-  app.quit()
-})
-ipcMain.on('min', (event, args) => {
-  mainWindow.minimize()
-})
-ipcMain.on('max', (event, args) => {
-  mainWindow.maximize()
-})
-
 app.on('ready', createWindow);
 
 app.on('window-all-closed', () => {
@@ -52,12 +42,65 @@ app.on('activate', () => {
   }
 });
 
+
+
+
+
+// IPC Code
+ipcMain.on('close', (event, arg) => {
+  app.quit()
+})
+ipcMain.on('min', (event, args) => {
+  mainWindow.minimize()
+})
+ipcMain.on('max', (event, args) => {
+  mainWindow.maximize()
+})
+
+
+
+
+
+
 // Discord functions
 const tokens = fs.readFileSync(path.join(__dirname, '../tokens.txt')).toString().split(/[\r\n]+/)
 const clients = []
 
 // Load all tokens synchronously
 let counter = tokens.length
+let success = 0
+let failed  = 0
 for (token of tokens) {
-    
+  console.log(token)
+  if (token) {
+    const client = new discord.Client()
+    client.login(token)
+      .then(() => {
+        clients.push(client)
+        success++
+        counter--
+      })
+      .catch(() => {
+        failed++
+        counter--
+      })
+  } else {
+    failed++
+    counter--
+  } 
 }
+function check() {
+  return new Promise(resolve => {
+    const int = setInterval(() => {
+      if (counter == 0) {
+        console.log(counter)
+        console.log('success')
+        console.log(success,failed)
+        clearInterval(int)
+      }
+    },500)
+  })
+}
+(async () => {
+  await check()
+})()
