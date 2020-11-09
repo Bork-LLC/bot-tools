@@ -1,26 +1,32 @@
 <script>
 	// export let name;
 
-	import { MaterialApp, NavigationDrawer, List, ListItem } from 'svelte-materialify'
-	import { Router, Link } from '@jamen/svelte-router'
+	import { MaterialApp, NavigationDrawer, List, ListItem, ProgressCircular } from 'svelte-materialify'
+	import Router from 'svelte-spa-router'
+	import { push } from 'svelte-spa-router'
 
+	
 	import FaHome from 'svelte-icons/fa/FaHome.svelte'
 	import FaCoins from 'svelte-icons/fa/FaCoins.svelte'
 	import FaHdd from 'svelte-icons/fa/FaHdd.svelte'
 	import FaDungeon from 'svelte-icons/fa/FaDungeon.svelte'
 	import FaServer from 'svelte-icons/fa/FaServer.svelte'
+	import FaAlignCenter from 'svelte-icons/fa/FaAlignCenter.svelte'
 
 	import Home from './components/Home.svelte'
+	import Tokens from './components/Tokens.svelte'
 
 	// Router data
 	const routes = {
-		'/': Home
+		'/': Home,
+		'/tokens': Tokens
 	}
 
 	// Electron funcs to control app
 	const { ipcRenderer } = require("electron");
 	window.ipc = ipcRenderer
 
+	// Handle side bar movement
 	let mini = true 
 	function enter() {
 		mini = false
@@ -28,6 +34,45 @@
 	function leave() {
 		mini = true
 	}
+
+	// Create websocket for interprocess transfer
+	let opened = false
+	let status = 'Launching websocket'
+	window.socket = new WebSocket("ws://localhost:32875")
+	
+	socket.onmessage = (event) => {
+		const { type, data } = JSON.parse(event.data)
+
+		switch(type) {
+			case 'statistics': 
+				const {total,success,failed,servers,members} = data
+				opened = true
+				window.statsrows=[{id:"a",stat:"Total Tokens",value:total},{id:"b",stat:"Total Valid Tokens",value:success},{id:"c",stat:"Total Invalid Tokens",value:failed},{id:"d",stat:"Total Servers",value:servers},{id:"e",stat:"Total Server Members",value:members}];
+			case 'tokenupdate':
+				status = data.text || ''
+			default:
+				break
+		}
+	}
+	socket.onopen = () => {
+		console.log('opened')
+	}
+
+	// Assert certain data for other pages info that will be transfered via websocket
+	window.statsrows = []
+
+	// Wait for all tokens to load
+	async function isLoaded() {
+		return new Promise(resolve => {
+			const int = setInterval(() => {
+				if (opened) {
+					clearInterval(int)
+					resolve(true) 
+				}
+			}, 250)
+		})
+	}
+
 </script>
 
 <MaterialApp theme="dark">
@@ -44,63 +89,101 @@
 			</div>
 		</div>
 		<div id="maintop">
-			<img id='icon' src='./favicon.gif' />
-			<h6 style='padding-left: 7px;padding-top: 1px;font-weight: 90%'>Bot Tools</h6>
+			<h6 id="title" >Bot Tools</h6>
 		</div>
 	</div>
-	<div style="height: 100%;"class='d-inline-block' id="nav"on:mouseenter={enter} on:mouseleave={leave}>
-		<NavigationDrawer {mini} style="background-color: rgb(40,40,40);float: left; position: fixed; z-index: 12; top: 30px">
-			<List dense nav>
-				<ListItem>
-					<span slot="prepend" style="padding-right: 10px;padding-top: 5px">
-						<div class='icon'>
-							<FaHome />
-						</div>
-						
-					</span>
-					<Link style='text-decoration: none;color: white !important' href='/'>Home</Link>
-				</ListItem>
-				<ListItem>
-					<span slot="prepend" style="padding-right: 10px;padding-top: 5px">
-						<div class='icon'>
-							<FaDungeon />
-						</div>
-					</span>
-					Dashboard
-				</ListItem>
-				<ListItem>
-					<span slot="prepend" style="padding-right: 10px;padding-top: 5px">
-						<div class='icon'>
-							<FaCoins />
-						</div>
-					</span>
-					Tokens
-				</ListItem>
-				<ListItem>
-					<span slot="prepend" style="padding-right: 10px;padding-top: 5px">
-						<div class='icon'>
-							<FaHdd />
-						</div>
-					</span>
-					Servers
-				</ListItem>
-				<ListItem>
-					<span slot="prepend" style="padding-right: 10px;padding-top: 5px">
-						<div class='icon'>
-							<FaServer />
-						</div>
-					</span>
-					Console
-				</ListItem>
-			</List>
-		</NavigationDrawer>
-	</div>
-	<div id='wrapper'style="float:right;width: calc(100% - 56px); height: calc(100% - 30px);margin-top: 30px">
-		<Router style="width:100%;height: 100%; float: right;" {routes}></Router>
-	</div>
+	{#await isLoaded()}
+		<div id='loader'>
+			<center>
+				<h4 class='noselect'style='margin-top: 20%'>Loading Tokens...</h4>
+				<h5 class='noselect'style='margin-top: 30px'>{status}</h5>
+				<ProgressCircular style='margin-top: 45px'size={100} indeterminate color="red" />
+			</center>
+		</div>
+	{:then val}
+		<div style="height: 100%;"class='d-inline-block' id="nav"on:mouseenter={enter} on:mouseleave={leave}>
+			<NavigationDrawer {mini} style="background-color: #964044;float: left; position: fixed; z-index: 12; top: 30px">
+				<List dense nav>
+					<ListItem on:click={() => push('/')}>
+						<span slot="prepend" style="padding-right: 10px;padding-top: 5px">
+							<div class='icon'>
+								<FaHome />
+							</div>
+							
+						</span>
+						Home
+					</ListItem>
+					<ListItem>
+						<span slot="prepend" style="padding-right: 10px;padding-top: 5px">
+							<div class='icon'>
+								<FaDungeon />
+							</div>
+						</span>
+						Dashboard
+					</ListItem>
+					<ListItem on:click={() => push('/tokens')}>
+						<span slot="prepend" style="padding-right: 10px;padding-top: 5px">
+							<div class='icon'>
+								<FaCoins />
+							</div>
+						</span>
+						Tokens
+					</ListItem>
+					<ListItem>
+						<span slot="prepend" style="padding-right: 10px;padding-top: 5px">
+							<div class='icon'>
+								<FaHdd />
+							</div>
+						</span>
+						Servers
+					</ListItem>
+					<ListItem>
+						<span slot="prepend" style="padding-right: 10px;padding-top: 5px">
+							<div class='icon'>
+								<FaServer />
+							</div>
+						</span>
+						Console
+					</ListItem>
+					<ListItem>
+						<span slot="prepend" style="padding-right: 10px;padding-top: 5px">
+							<div class='icon'>
+								<FaAlignCenter />
+							</div>
+						</span>
+						Logs
+					</ListItem>
+				</List>
+			</NavigationDrawer>
+		</div>
+		<div id='wrapper'style="float:right;width: calc(100% - 56px); height: calc(100% - 30px);margin-top: 30px">
+			<Router {routes}></Router>
+		</div>
+	{/await}
 </MaterialApp>
 
 <style>
+	#title {
+		padding-left: 7px;
+		padding-top: 1px;
+		font-weight: normal;
+		font-size: 12px;
+		text-align: center;
+		user-select:none
+	}
+	.noselect {
+		-moz-user-select: none;
+		-khtml-user-select: none;
+		-webkit-user-select: none;
+		-ms-user-select: none;
+		user-select: none;
+	}
+	#loader {
+		height: calc(100%);
+		width: 100%;
+		background-color: rgb(30,30,30);
+		padding-top: 30px
+	}
 	#icon {
 		float: left;
 		padding-left: 5px;
@@ -130,8 +213,9 @@
 		display: inline-block
 	} 
 	#maintop {
-		width: calc(100% - 130px);
+		width: 100vw;
 		float: left;
+		position: absolute;
 		height: 100%;
 		-webkit-app-region: drag
 	}

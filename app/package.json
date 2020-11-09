@@ -48,6 +48,7 @@
     "@fortawesome/free-solid-svg-icons": "^5.15.1",
     "@jamen/svelte-router": "^0.4.0",
     "carbon-components-svelte": "^0.22.0",
+    "discord.js": "^10.0.1",
     "electron-reload": "^1.5.0",
     "electron-squirrel-startup": "^1.0.0",
     "sirv-cli": "^0.4.4",
@@ -55,7 +56,8 @@
     "svelte-fa": "^2.1.1",
     "svelte-icons": "^2.1.0",
     "svelte-routing": "^1.4.2",
-    "svelte-simple-datatables": "^0.1.19"
+    "svelte-simple-datatables": "^0.1.19",
+    "svelte-spa-router": "^3.0.5"
   },
   "devDependencies": {
     "@electron-forge/cli": "^6.0.0-beta.50",

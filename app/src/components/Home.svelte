@@ -1,89 +1,81 @@
 <script>
+    import { ProgressCircular } from 'svelte-materialify'
     import { DataTable } from "carbon-components-svelte"
-  
+
+    async function dataExists() {
+        return new Promise(resolve => {
+            const int = setInterval(() => {
+                if (window.statsrows.length != 0) {
+                    clearInterval(int)
+                    resolve(window.statsrows)
+                }
+            }, 100)
+        })
+    }
 </script>
 
 <main>
-    <h5 class='noselect'>Token Information</h5>
-    <DataTable class='noselect'
-        headers = {
-            [
-                {
-                    key: 'type',
-                    value: 'Type'
-                }, 
-                {
-                    key: 'price',
-                    value: 'Price / Token'
-                }, 
-                {
-                    key: 'stock',
-                    value: 'Stock'
-                }, 
-            ]
-        }
-        rows = {
-            [
-                {
-                    id: 'a',
-                    type: 'Unique Token',
-                    price: '0.50 USD',
-                    stock: '1923 Tokens'
-                }, 
-                {
-                    id: 'b',
-                    type: 'Shared Token',
-                    price: '0.10 USD',
-                    stock: '19234 Tokens'
-                }, 
-            ]
-        }
-    />
-    <h5 class='noselect' style="padding-top: 20px">Your Information</h5>
-    <DataTable
-        headers = {
-            [
-                {
-                    key: 'stat',
-                    value: 'State'
-                }, 
-                {
-                    key: 'value',
-                    value: 'Value'
-                }, 
-            ]
-        }
-        rows = {
-            [
-                {
-                    id: 'a',
-                    stat: 'Total Tokens',
-                    value: 'loading...'
-                }, 
-                {
-                    id: 'b',
-                    stat: 'Total Valid Tokens',
-                    value: 'loading...'
-                }, 
-                {
-                    id: 'c',
-                    stat: 'Total Invalid Tokens',
-                    value: 'loading...'
-                }, 
-                {
-                    id: 'd',
-                    stat: 'Total Servers',
-                    value: 'loading...'
-                }, 
-                {
-                    id: 'e',
-                    stat: 'Total Server Members',
-                    value: 'loading...'
-                }, 
-            ]
-        }
-    />
+    {#await dataExists()}
+        <center>
+            <ProgressCircular style='margin-top: 25%'size={100} indeterminate color="red" />
+        </center>
+    {:then val}
+        <h5 class='noselect'>Token Information</h5>
+        <DataTable class='noselect'
+            style="user-select: none"
+            headers = {
+                [
+                    {   
+                        key: 'type',
+                        value: 'Type'
+                    }, 
+                    {
+                        key: 'price',
+                        value: 'Price / Token'
+                    }, 
+                    {
+                        key: 'stock',   
+                        value: 'Stock'
+                    }, 
+                ]
+            }
+            rows = {
+                [
+                    {
+                        id: 'a',
+                        type: 'Unique Token',
+                        price: '0.15 USD',
+                        stock: '1923 Tokens'
+                    }, 
+                    {
+                        id: 'b',
+                        type: 'Shared Token',
+                        price: '0.10 USD',
+                        stock: '19234 Tokens'
+                    }, 
+                ]
+            }
+        />
+        <h5 class='noselect' style="padding-top: 20px">Statistics</h5>
+        <DataTable
+            style="user-select: none"
+            headers = {
+                [
+                    {
+                        key: 'stat',
+                        value: 'State'
+                    }, 
+                    {
+                        key: 'value',
+                        value: 'Value'
+                    }, 
+                ]
+            }
+            rows = {val}
+        />
+    {/await}
 </main>
+
 
 <style>
     .noselect {
