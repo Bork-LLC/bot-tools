@@ -1,9 +1,26 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 
 const discord = require('discord.js')
+const fetch   = require('node-fetch')
 const socket  = require('ws')
 const path    = require('path');
 const fs      = require('fs');
+const os      = require('os')
+
+// Locate the users documents folder
+const home = os.homedir()
+const documents = path.join(home, 'Documents')
+
+let tools
+if (fs.existsSync(documents)) {
+	tools = path.join(documents, 'Bot Tools')
+	if (!fs.existsSync(tools)) {
+		fs.mkdirSync(tools, { recursive: false })
+		fs.mkdirSync(path.join(tools, 'scripts'), { recursive: false })
+		fs.writeFileSync(path.join(tools,'tokens.txt'),'')
+	}
+}
+
 
 // Live Reload
 require('electron-reload')(__dirname, {
@@ -26,7 +43,9 @@ const createWindow = () => {
 		frame: false
   	});
 
-  	mainWindow.loadFile(path.join(__dirname, '../public/index.html'));
+	mainWindow.loadFile(path.join(__dirname, '../public/index.html'));
+	
+	mainWindow.webContents.openDevTools({mode:'undocked'})
 };
 
 app.on('ready', createWindow);
@@ -65,17 +84,8 @@ ipcMain.on('max', (event, args) => {
 // Websockets for data transfer
 const server = new socket.Server({ port: 32875 })
 let lastSocket
-let lastData
 server.on('connection', (w) => {
 	// Handle socket open
-	if (lastData) {
-		w.send(JSON.stringify(
-			{
-				type: 'statistics',
-				data: lastData
-			}
-		))
-	}
 	// Handle socket close
 	w.on('close', () => {
 		console.log('the websocket has been closed')
@@ -85,33 +95,70 @@ server.on('connection', (w) => {
 	lastSocket = w
 		
 	// Token Loading
-	const tokens = fs.readFileSync(path.join(__dirname, '../tokens.txt')).toString().split(/[\r\n]+/)
-	const clients = []
+	const tokens  = fs.readFileSync(path.join(__dirname, '../tokens.txt')).toString().split(/[\r\n]+/)
+	const clients = {}
 	const servers = {}
+	const admins  = {}
+	const guilds  = {}
 
 	// Load all tokens synchronously
 	let success = 0
 	let failed = 0
 	let start
 
-	for (token of tokens) {
+	const clientData = []
+	let clientCount = 0
+	for (const token of tokens) {
 		if (token) {
 			// Create new client
 			const client = new discord.Client()
 
 			// Get guild info
 			client.on('ready', () => {
-				success++;
-				ping()
-				for (guild of client.guilds) {
-					servers[guild[1].id] = guild[1].memberCount
+				if (client.user) {
+					for (guild of client.guilds) {
+						servers[guild[1].id] = guild[1].memberCount
+
+						const member = guild[1].members.get(client.user.id)
+
+						admins[guild[1].id] = admins[guild[1].id] || member.hasPermission('ADMINISTRATOR')
+
+						guilds[guild[1].id] = {
+							name: guild[1].name,
+							id: guild[1].id,
+							members: guild[1].memberCount,
+						}
+					}
+	
+					const user = client.user
+					clientData.push({
+						id: user.id,
+						type: user.bot ? 'Bot' : 'User',
+						name: `${user.username}#${user.discriminator}`,
+						token,
+						status: 'Valid'
+					})
+					clientCount++
+					success++;
+					ping()
 				}
 			})
 
 			// Attempt to login to token
 			client.login(token)
-				.then(() => {clients.push(client);})
-				.catch(() => { failed++;ping()})
+				.then(() => {clients[token] = client;})
+				.catch(() => {
+					clientData.push({
+						id: 'N/A',
+						name: `N/A`,
+						type: 'N/A',
+						token,
+						status: 'Invalid'
+					})
+					clientCount++
+					failed++;
+					ping()
+				})
 		} else {
 			failed++
 			ping()
@@ -125,17 +172,41 @@ server.on('connection', (w) => {
 			}
 		))
 		if (success + failed == tokens.length) {
+
+			// all tokens are loading, proceed
 			let size = 0
 			for (guild in servers) {
 				size += servers[guild]
 			}
-			lastData = { total: tokens.length, success, failed, servers: Object.keys(servers).length, members: size }
 			w.send(JSON.stringify(
 				{
 					type: 'statistics',
-					data: lastData
+					data: { total: tokens.length, success, failed, servers: Object.keys(servers).length, members: size }
 				}
 			))
+			w.send(JSON.stringify({
+				type: 'tokens',
+				data: clientData
+			}))
+
+			const temp = []
+			const keys = Object.keys(guilds)
+			let counter = 0
+
+			for (let guildID of keys) {
+				counter++
+
+				const guild = guilds[guildID]
+				guild.admin = admins[guildID]
+
+				temp.push(guild)
+				if (counter == keys.length) {
+					w.send(JSON.stringify({
+						type: 'servers',
+						data: temp
+					}))
+				}
+			}
 		}
 	}
 })

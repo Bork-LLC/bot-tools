@@ -1,10 +1,11 @@
 <script>
 	// export let name;
-
+	import { onMount } from 'svelte'
 	import { MaterialApp, NavigationDrawer, List, ListItem, ProgressCircular } from 'svelte-materialify'
-	import Router from 'svelte-spa-router'
 	import { push } from 'svelte-spa-router'
 
+	import Router from 'svelte-spa-router'
+	import jQuery from 'jquery'
 	
 	import FaHome from 'svelte-icons/fa/FaHome.svelte'
 	import FaCoins from 'svelte-icons/fa/FaCoins.svelte'
@@ -15,11 +16,15 @@
 
 	import Home from './components/Home.svelte'
 	import Tokens from './components/Tokens.svelte'
+	import Servers from './components/Servers.svelte'
+	import Console from './components/Console.svelte'
 
 	// Router data
 	const routes = {
 		'/': Home,
-		'/tokens': Tokens
+		'/tokens': Tokens,
+		'/servers': Servers,
+		'/console': Console
 	}
 
 	// Electron funcs to control app
@@ -50,6 +55,10 @@
 				window.statsrows=[{id:"a",stat:"Total Tokens",value:total},{id:"b",stat:"Total Valid Tokens",value:success},{id:"c",stat:"Total Invalid Tokens",value:failed},{id:"d",stat:"Total Servers",value:servers},{id:"e",stat:"Total Server Members",value:members}];
 			case 'tokenupdate':
 				status = data.text || ''
+			case 'tokens': 
+				window.tokendata = data
+			case 'servers':
+				window.serverdata = data
 			default:
 				break
 		}
@@ -60,7 +69,7 @@
 
 	// Assert certain data for other pages info that will be transfered via websocket
 	window.statsrows = []
-
+	window.editors = []
 	// Wait for all tokens to load
 	async function isLoaded() {
 		return new Promise(resolve => {
@@ -73,9 +82,13 @@
 		})
 	}
 
+	onMount(() => {
+		window.jQuery = jQuery
+	})
 </script>
 
 <MaterialApp theme="dark">
+	<script src="./jquery.dataTables.min.js" defer></script>
 	<div id="topbar">
 		<div id="buttons">
 			<div class="iconb" on:click="{()=>window.ipc.send("min")}" >
@@ -129,7 +142,7 @@
 						</span>
 						Tokens
 					</ListItem>
-					<ListItem>
+					<ListItem on:click={() => push('/servers')}>
 						<span slot="prepend" style="padding-right: 10px;padding-top: 5px">
 							<div class='icon'>
 								<FaHdd />
@@ -137,7 +150,7 @@
 						</span>
 						Servers
 					</ListItem>
-					<ListItem>
+					<ListItem on:click={() => push('/console')}>
 						<span slot="prepend" style="padding-right: 10px;padding-top: 5px">
 							<div class='icon'>
 								<FaServer />
@@ -177,7 +190,7 @@
 		-webkit-user-select: none;
 		-ms-user-select: none;
 		user-select: none;
-	}
+	}	
 	#loader {
 		height: calc(100%);
 		width: 100%;
@@ -210,7 +223,7 @@
 		width: 130px;
 		height: 100%; 
 		float: right;
-		display: inline-block
+		display: inline-block;
 	} 
 	#maintop {
 		width: 100vw;
@@ -229,6 +242,7 @@
 		height: 100%;
 		width: 40px;
 		cursor: pointer;
+		z-index: 1000000
 	}
 	.iconb img {
 		padding-left: 10px;
