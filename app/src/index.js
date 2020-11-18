@@ -45,7 +45,7 @@ const createWindow = () => {
 
 	mainWindow.loadFile(path.join(__dirname, '../public/index.html'));
 	
-	mainWindow.webContents.openDevTools({mode:'undocked'})
+	// mainWindow.webContents.openDevTools({mode:'undocked'}) // annoying as fuck
 };
 
 app.on('ready', createWindow);

@@ -18,13 +18,15 @@
 	import Tokens from './components/Tokens.svelte'
 	import Servers from './components/Servers.svelte'
 	import Console from './components/Console.svelte'
+	import Dashboard from './components/DashBoard.svelte'
 
 	// Router data
 	const routes = {
 		'/': Home,
 		'/tokens': Tokens,
 		'/servers': Servers,
-		'/console': Console
+		'/console': Console,
+		'/dash' : Dashboard
 	}
 
 	// Electron funcs to control app
@@ -60,6 +62,7 @@
 			case 'servers':
 				window.serverdata = data
 			default:
+				window[type+ "data"] = data;
 				break
 		}
 	}
@@ -126,7 +129,7 @@
 						</span>
 						Home
 					</ListItem>
-					<ListItem>
+					<ListItem on:click={() => push('/dash')} >
 						<span slot="prepend" style="padding-right: 10px;padding-top: 5px">
 							<div class='icon'>
 								<FaDungeon />

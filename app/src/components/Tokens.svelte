@@ -46,7 +46,7 @@
                 info: false,
                 lengthChange: false,
                 pageLength: 15,
-                autoWidth: true,
+                autoWidth: false,
                 columnDefs: [{
                     targets: '_all',
                     createdCell: (td, celldata, rowdata, row, col) => {
@@ -58,16 +58,18 @@
                         } else if(celldata ==='Invalid') {
                             t.css('background-color', '#BC4B51')
                         }
-
+                        if (col == 0 ) {
+                            t.css('text-overflow','elipse')
+                        }
                         // Blur token
                         if (col === 3) {
-                            t.css('color','transparent')
-                            t.css('text-shadow','0 0 5px rgba(255,255,255,0.5)') 
+                            t.css({'color':'transparent','text-shadow':'0 0 5px rgba(255,255,255,0.5)',width:"20%"})
+                            
 
                             t.hover(() => {
-                               t.css('color','white')
+                               t.css({color:"white"})
                             }, () => {
-                                t.css('color','transparent')
+                                t.css({color:"transparent"})
                             })
                         } else {
                             t.css('user-select','none')
