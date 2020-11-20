@@ -1,5 +1,4 @@
 <script>
-    export let ref;
 </script>
 
 
@@ -13,17 +12,14 @@
         min-width: 24%;
         height: 100%;
         border-radius: 10px;
-        border-color: #af4b4b;
+        
         padding:10px;
 
         transition: all 500ms;
     }
     .box:hover {
-        transition: all 250ms;
-        border-color: #af4b4b;
-        border-width: 2px;
-        border-style: solid;
-        box-shadow: inset 0px 0px 0px 3px #212121;
+        transition: box-shadow 250ms;
+        box-shadow: inset 0px 0px 0px 3px #212121, 0 0 1px 3px #af4b4b;
 
     }
 

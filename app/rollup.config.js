@@ -26,6 +26,13 @@ export default {
 			// a separate file - better for performance
 			css: css => {
 				css.write('public/build/bundle.css');
+			},
+			onwarn: (warning, handler) => {
+				// e.g. don't warn on <marquee> elements, cos they're cool
+				if (warning.code === 'PLUGIN_WARNING') return;
+
+				// let Rollup handle all other warnings normally
+				handler(warning);
 			}
 		}),
 

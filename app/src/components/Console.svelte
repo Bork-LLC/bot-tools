@@ -1,6 +1,6 @@
 <script>
     import { Button } from 'svelte-materialify'
-    import { onMount } from 'svelte'
+    // import { onMount } from 'svelte'
 
     import AceEditor from 'svelte-ace-editor'
 
@@ -22,6 +22,7 @@
                     theme="clouds_midnight"
                     lang='lua'
                     bind:value={value}
+                    name="a"
                 />
             </div>
         </div>
@@ -29,15 +30,16 @@
             <h5 class='titlebar'>Output</h5>
             <div id='editor2' style='width:100%;height:calc(100% - 40px)'></div>
         </div>
-        <div id='side3' style='width: calc(20% - 10px); height: 109.5%;float:left;padding-left: 10px'>
+        <div id='side3' style='width: calc(20% - 10px); height: 112.5%;float:left;padding-left: 10px'>
             <h5 class='titlebar'>Scripts</h5>
             <div id='scripts' style='height: calc(100% - 40px); width: 100%; background-color:#191919'>
     
             </div>
         </div>
     </div>
-    <div id="bottombar" style="width: calc(80% - 20px); height: calc(10% - 20px);background-color:#191919; ">
-        <Button style="position: absolute; left:90px; transform: translateY(5px);" >execute</Button>
+    <div id="bottombar" >
+        <Button class='btnaaaa' style="height:100%" >execute</Button>
+        <!-- aaaaaa -->
     </div>
 </main>
 
@@ -47,6 +49,21 @@
         width: calc(100% - 40px);
         margin-top: 10px;
         margin-left: 20px;
+        display: flex;
+        flex-flow: wrap;
+    }
+    .btnaaaa {
+        position: relative;
+        margin-bottom: 0;
+        height: 100%;
+    }
+    #bottombar {
+        width: calc(80% - 20px); 
+        min-height: calc(10% - 40px);
+        background-color:#191919; 
+        padding-top: 10px;
+        padding-left: 10px;
+        padding-bottom: 10px;
     }
     .titlebar {
         width: 100%;
