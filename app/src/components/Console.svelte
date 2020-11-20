@@ -22,7 +22,7 @@
         </div>
     </div>
     <div id="bottombar" style="width: calc(80% - 20px); height: calc(10% - 20px);background-color:#191919; ">
-        <Button style="position: fixed" >execute</Button>
+        <Button style="position: absolute; left:90px; transform: translateY(5px);" >execute</Button>
     </div>
 </main>
 
