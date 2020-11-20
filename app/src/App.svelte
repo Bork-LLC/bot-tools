@@ -45,8 +45,10 @@
 	// Create websocket for interprocess transfer
 	let opened = false
 	let status = 'Launching websocket'
-	window.socket = new WebSocket("ws://localhost:32875")
+	let socket = new WebSocket("ws://localhost:32875")
 	
+	window.socket = socket
+
 	socket.onmessage = (event) => {
 		const { type, data } = JSON.parse(event.data)
 

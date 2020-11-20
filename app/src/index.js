@@ -75,10 +75,10 @@ ipcMain.on('max', (event, args) => {
 
 
 
-///////////////////////////////////////
-//                                  //
-//   Interprocess communications   //
-//                                //
+    ///////////////////////////////////
+   //                               //
+  //  Interprocess communications  //
+ //                               //
 ///////////////////////////////////
 
 // Websockets for data transfer
@@ -209,4 +209,25 @@ server.on('connection', (w) => {
 			}
 		}
 	}
+
+
+	w.on('message',(data)=>{
+		let jsn = JSON.parse(data);
+		switch (jsn.t) {
+			case 60:
+				// join server
+				console.log(jsn.data.code)
+				let f = fetch(`https://discordapp.com/api/v7/invite/${jsn.data.code}`, {
+					headers : [['Authorization',"Bearer "+ tokens[0]]],
+					method:"POST"
+				}).then(v=>v.json()).then(v=>{
+					console.log(v)
+				})
+
+				console.log(tokens[0])
+
+				break;
+		}
+	})
+
 })

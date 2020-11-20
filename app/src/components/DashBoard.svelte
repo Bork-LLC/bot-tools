@@ -4,6 +4,7 @@
     import FaServer from 'svelte-icons/fa/FaServer.svelte'
     import FaCoins from 'svelte-icons/fa/FaCoins.svelte'
     import { ProgressCircular } from 'svelte-materialify'
+    import { Button,TextField  } from 'svelte-materialify'
 
 
     async function TokensLoaded() {
@@ -28,6 +29,8 @@
             }, 250)
         })
     }
+
+    let inviteCode;
 
 </script>
 
@@ -71,6 +74,12 @@
                 </div>
             {/await}
         </Box>
+    </div>
+    <div style="width:100%; padding : 10px; display:flex;flex-flow:wrap;" >
+        <div style="flex:1 1 5%" />
+        <TextField bind:value={inviteCode} color="red" >Invite Code</TextField>
+        <Button on:click={ window.socket.send(JSON.stringify({ t:60, data : {code : inviteCode}  })) } >Join server</Button>    
+        <div style="flex:1 1 45%" />
     </div>
 </main>
 
