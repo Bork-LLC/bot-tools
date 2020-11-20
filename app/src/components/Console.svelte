@@ -2,7 +2,6 @@
     import { Button } from 'svelte-materialify'
     import { onMount } from 'svelte'
 
-    console.log(monaco)
 </script>
 
 <main>
@@ -23,7 +22,7 @@
         </div>
     </div>
     <div id="bottombar" style="width: calc(80% - 20px); height: calc(10% - 20px);background-color:#191919; ">
-        <Button style="top: -20" >execute</Button>
+        <Button style="position: fixed" >execute</Button>
     </div>
 </main>
 

@@ -39,7 +39,7 @@
                     <ProgressCircular style='margin-top: 25%'size={20} indeterminate color="red" />
                 </center>
             {:then val}
-                <h4>Loaded Tokens</h4> 
+                <h4 style='user-select: none'>Loaded Tokens</h4> 
                 <hr/> 
                 <br/>
                 <div style="display:flex; flex-flow:row " >
@@ -48,7 +48,7 @@
                         
                         <FaCoins /> 
                     </div>
-                    <h5  > {val.length}  </h5> 
+                    <h5  style='user-select: none'> {val.length}  </h5> 
                 </div>
             {/await}
         </Box>
@@ -58,7 +58,7 @@
                     <ProgressCircular style='margin-top: 25%'size={20} indeterminate color="red" />
                 </center>
             {:then val}
-                <h4>Loaded Servers</h4> 
+                <h4 style='user-select: none'>Loaded Servers</h4> 
                 <hr/> 
                 <br/>
                 <div style="display:flex; flex-flow:row " >
@@ -67,7 +67,7 @@
                         
                         <FaServer /> 
                     </div>
-                    <h5  > {val.length}  </h5> 
+                    <h5  style='user-select: none'> {val.length}  </h5> 
                 </div>
             {/await}
         </Box>

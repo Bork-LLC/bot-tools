@@ -36,18 +36,20 @@
             window.jQuery('#tokensdata').DataTable({
                 data: window.tokendata,
                 columns: [
-                    { data: 'name' },
-                    { data: 'id' },
-                    { data: 'type' },
-                    { data: 'token' },
-                    { data: 'status' }
+                    { data: 'name'},
+                    { data: 'id'},
+                    { data: 'type'},
+                    { data: 'token'},
+                    { data: 'status'}
                 ],
                 searching: false,
                 info: false,
                 lengthChange: false,
                 pageLength: 15,
-                autoWidth: false,
-                columnDefs: [{
+                autoWidth: true,
+                fixedColumns: true,
+                columnDefs: [
+                    {
                     targets: '_all',
                     createdCell: (td, celldata, rowdata, row, col) => {
                         const t = window.jQuery(td) 
@@ -58,21 +60,28 @@
                         } else if(celldata ==='Invalid') {
                             t.css('background-color', '#BC4B51')
                         }
-                        if (col == 0 ) {
-                            t.css('text-overflow','elipse')
-                        }
-                        // Blur token
-                        if (col === 3) {
-                            t.css({'color':'transparent','text-shadow':'0 0 5px rgba(255,255,255,0.5)',width:"20%"})
-                            
 
-                            t.hover(() => {
-                               t.css({color:"white"})
-                            }, () => {
-                                t.css({color:"transparent"})
-                            })
-                        } else {
-                            t.css('user-select','none')
+                        switch (col) {
+                            case 0:
+                                t.css({
+                                    'user-select': 'none',
+                                    'overflow': 'hidden',
+                                    'text-overflow': 'ellipsis'
+                                })
+                                break
+                            case 3:
+                                t.css({'color':'transparent','text-shadow':'0 0 5px rgba(255,255,255,0.5)',width:"20%"})
+                                
+
+                                t.hover(() => {
+                                t.css({color:"white"})
+                                }, () => {
+                                    t.css({color:"transparent"})
+                                })
+                                break
+                            default: 
+                                t.css('user-select','none')
+                                break
                         }
                     }
                 }]
