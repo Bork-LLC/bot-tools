@@ -2,13 +2,28 @@
     import { Button } from 'svelte-materialify'
     import { onMount } from 'svelte'
 
+    import AceEditor from 'svelte-ace-editor'
+
+    require('brace');
+    require('brace/mode/lua')
+    require('brace/theme/clouds_midnight')
+
+    let value = 'a'
 </script>
 
 <main>
     <div style="width: 100%; height: 90%; margin-bottom: 0">
         <div id="side1" style='width:calc(40% - 10px);height: 100%;float:left'>
             <h5 class='titlebar'>Input</h5>
-            <div id='editor1' style='width:100%;height:calc(100% - 40px)'></div>
+            <div id='editor1' style='width:100%;height:calc(100% - 40px)'>
+                <AceEditor 
+                    height="100%"
+                    width="100%"
+                    theme="clouds_midnight"
+                    lang='lua'
+                    bind:value={value}
+                />
+            </div>
         </div>
         <div id="side2" style='width:calc(40% - 10px);height: 100%;float:left;padding-left: 10px'>
             <h5 class='titlebar'>Output</h5>
